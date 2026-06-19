@@ -72,36 +72,42 @@ export const submitContactService = async (
   const from = `"${company.fromName || company.name}" <${senderAddress}>`;
   const submittedAt = new Date().toISOString();
 
-  // 1) Notify the company (Reply-To set to the sender so they can reply directly).
-  void sendContactNotificationMail(mailer, from, company.contactEmail, {
-    companyName: company.name,
-    name: data.name,
-    email: data.email,
-    phone: data.phone,
-    subject: data.subject,
-    message: data.message,
-    submittedAt,
-    fields: metadataToFields(data.metadata),
-    logoUrl: company.branding?.logoUrl,
-    primaryColor: company.branding?.primaryColor,
-  });
-
-  // 2) Auto-reply to the sender confirming receipt.
-  void sendContactAutoReplyMail(
-    mailer,
-    from,
-    data.email,
-    {
+  // Both emails are awaited (not fire-and-forget): on serverless the function
+  // instance is frozen the moment the response is sent, so un-awaited sends get
+  // killed before the SMTP handshake completes. The mail helpers swallow their
+  // own errors, so a failed send still won't break this request.
+  await Promise.all([
+    // 1) Notify the company (Reply-To set to the sender so they can reply directly).
+    sendContactNotificationMail(mailer, from, company.contactEmail, {
       companyName: company.name,
       name: data.name,
+      email: data.email,
+      phone: data.phone,
+      subject: data.subject,
       message: data.message,
+      submittedAt,
+      fields: metadataToFields(data.metadata),
       logoUrl: company.branding?.logoUrl,
       primaryColor: company.branding?.primaryColor,
-      supportEmail: company.supportEmail || company.contactEmail,
-      autoReplyMessage: company.autoReplyMessage,
-    },
-    company.replyToEmail || company.contactEmail,
-  );
+    }),
+
+    // 2) Auto-reply to the sender confirming receipt.
+    sendContactAutoReplyMail(
+      mailer,
+      from,
+      data.email,
+      {
+        companyName: company.name,
+        name: data.name,
+        message: data.message,
+        logoUrl: company.branding?.logoUrl,
+        primaryColor: company.branding?.primaryColor,
+        supportEmail: company.supportEmail || company.contactEmail,
+        autoReplyMessage: company.autoReplyMessage,
+      },
+      company.replyToEmail || company.contactEmail,
+    ),
+  ]);
 
   return new ApiResponse(201, "Message received", { id: saved._id });
 };
