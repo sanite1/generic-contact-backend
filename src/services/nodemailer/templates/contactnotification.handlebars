@@ -1,0 +1,61 @@
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>New contact message</title>
+    <style
+    >
+      body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
+      .container { max-width: 600px; margin: 30px auto; background: #ffffff; padding: 24px; border-radius: 8px; box-shadow: 0px 4px 10px rgba(0,0,0,0.08); }
+      .header { text-align: center; padding-bottom: 12px; }
+      .header img { max-width: 160px; }
+      .bar { height: 4px; border-radius: 4px; margin: 8px 0 20px; background: {{#if
+        primaryColor
+      }}{{primaryColor}}{{else}}#4f46e5{{/if}}; }
+      h2 { color: #222; margin-top: 0; }
+      p { color: #555; font-size: 15px; line-height: 1.5; }
+      .meta { width: 100%; border-collapse: collapse; margin: 16px 0; }
+      .meta td { padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 14px; color: #444; vertical-align: top; }
+      .meta td.label { font-weight: bold; color: #222; width: 140px; }
+      .message-box { background: #f7f9fc; border-left: 4px solid {{#if
+        primaryColor
+      }}{{primaryColor}}{{else}}#4f46e5{{/if}}; padding: 14px 16px; border-radius: 4px; color: #333; white-space: pre-wrap; }
+      .footer { margin-top: 28px; font-size: 12px; color: #999; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        {{#if logoUrl}}<img
+            src="{{logoUrl}}"
+            alt="{{companyName}} logo"
+          />{{/if}}
+      </div>
+      <div class="bar"></div>
+
+      <h2>New message via {{companyName}} contact form</h2>
+      <p>You received a new contact submission. Reply to this email to respond
+        directly to the sender.</p>
+
+      <table class="meta">
+        <tr><td class="label">Name</td><td>{{name}}</td></tr>
+        <tr><td class="label">Email</td><td>{{email}}</td></tr>
+        {{#if phone}}<tr><td class="label">Phone</td><td
+            >{{phone}}</td></tr>{{/if}}
+        {{#if subject}}<tr><td class="label">Subject</td><td
+            >{{subject}}</td></tr>{{/if}}
+        <tr><td class="label">Submitted</td><td>{{submittedAt}}</td></tr>
+        {{#each fields}}
+          <tr><td class="label">{{this.label}}</td><td>{{this.value}}</td></tr>
+        {{/each}}
+      </table>
+
+      <p><strong>Message</strong></p>
+      <div class="message-box">{{message}}</div>
+
+      <div class="footer">
+        <p>This notification was sent by the {{companyName}} contact form.</p>
+      </div>
+    </div>
+  </body>
+</html>
